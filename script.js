@@ -152,6 +152,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const certificatesGrid = document.querySelector('#certificates-grid');
     const certificatesMessage = document.querySelector('#certificates-message');
+    const fallbackCertificates = [
+        {
+            title: 'Artificial Intelligence Fundamentals',
+            issuer: 'IBM-SkillsBuild',
+            issue_date: '',
+            link: 'https://www.credly.com/badges/5b0a45f1-7de5-44f9-8158-187f81d55e22',
+            image: 'https://images.credly.com/images/82b908e1-fdcd-4785-9d32-97f11ccbcf08/linkedin_thumb_image.png',
+            description: 'This credential earner demonstrates knowledge of artificial intelligence (AI) concepts, such as natural language processing, computer vision, machine learning, deep learning, chatbots, and neural networks; AI ethics; and the applications of AI.'
+        }
+    ];
 
     const setSectionMessage = (element, text, isError = false) => {
         if (!element) return;
@@ -341,6 +351,15 @@ document.addEventListener("DOMContentLoaded", () => {
         const card = document.createElement('div');
         card.className = 'content-card reveal-up';
 
+        if (certificate.image) {
+            const image = document.createElement('img');
+            image.className = 'certificate-image';
+            image.src = certificate.image;
+            image.alt = `${certificate.title || 'Certificate'} badge`;
+            image.loading = 'lazy';
+            card.appendChild(image);
+        }
+
         const title = document.createElement('h3');
         title.textContent = certificate.title;
 
@@ -378,8 +397,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (certificatesGrid) {
         fetchJson('/api/certificates')
-            .then(items => renderContentCards(items, certificatesGrid, certificatesMessage, 'No certificates yet.', createCertificateCard))
-            .catch(() => setSectionMessage(certificatesMessage, 'Start the server to load certificates.', true));
+            .then(items => {
+                if (items && items.length > 0) {
+                    renderContentCards(items, certificatesGrid, certificatesMessage, 'No certificates yet.', createCertificateCard);
+                    return;
+                }
+                renderContentCards(fallbackCertificates, certificatesGrid, certificatesMessage, 'No certificates yet.', createCertificateCard);
+            })
+            .catch(() => renderContentCards(fallbackCertificates, certificatesGrid, certificatesMessage, 'No certificates yet.', createCertificateCard));
     }
 
     // 5. Smooth Nav Scrolling

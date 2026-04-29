@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
             name: 'certificates',
             formId: 'certificate-form',
             listId: 'certificate-list',
-            fields: ['title', 'issuer', 'issue_date', 'link', 'description', 'is_published'],
+            fields: ['title', 'issuer', 'issue_date', 'link', 'image', 'description', 'is_published'],
             title: (item) => item.title,
             meta: (item) => [item.issuer, item.issue_date].filter(Boolean).join(' • ')
         },

@@ -440,6 +440,16 @@ section {
     gap: 12px;
 }
 
+.certificate-image {
+    width: 120px;
+    height: 120px;
+    object-fit: contain;
+    border: 2px solid var(--glass-border);
+    background: var(--bg-dark);
+    padding: 6px;
+    box-shadow: 2px 2px 0 var(--glass-border);
+}
+
 .content-card h3 {
     font-family: var(--font-mono);
     text-transform: uppercase;
