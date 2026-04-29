@@ -424,6 +424,46 @@ section {
     gap: 30px;
 }
 
+.content-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px;
+}
+
+.content-card {
+    background: var(--glass-bg);
+    border: 2px solid var(--glass-border);
+    padding: 20px;
+    box-shadow: var(--shadow-hard);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.content-card h3 {
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    font-size: 1.05rem;
+}
+
+.content-meta {
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.content-quote {
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.content-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
 .skill-icon {
     font-size: 2.5rem;
     margin-bottom: 20px;
@@ -566,6 +606,124 @@ footer {
     font-size: 0.8rem;
     font-family: var(--font-mono);
     text-transform: uppercase;
+}
+
+/* Admin Dashboard */
+.admin-page {
+    min-height: 100vh;
+    padding: 120px 20px 60px;
+    cursor: auto;
+}
+
+.admin-page * {
+    cursor: auto;
+}
+
+.admin-shell {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.admin-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.admin-card {
+    background: var(--glass-bg);
+    border: 2px solid var(--glass-border);
+    padding: 24px;
+    box-shadow: var(--shadow-hard);
+    margin-bottom: 24px;
+}
+
+.admin-card h2 {
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+}
+
+.admin-form {
+    display: grid;
+    gap: 12px;
+}
+
+.admin-form input,
+.admin-form textarea,
+.admin-form select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 2px solid var(--glass-border);
+    background: var(--bg-dark);
+    color: var(--text-main);
+    font-family: var(--font-mono);
+}
+
+.admin-form textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.admin-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.admin-btn {
+    padding: 10px 16px;
+    border: 2px solid var(--glass-border);
+    background: var(--glass-bg);
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    box-shadow: 2px 2px 0 var(--glass-border);
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.admin-btn:hover {
+    background: var(--accent-2);
+    color: #000;
+    transform: translate(-2px, -2px);
+    box-shadow: 4px 4px 0 var(--glass-border);
+}
+
+.admin-btn.secondary:hover {
+    background: var(--accent-4);
+}
+
+.admin-list {
+    display: grid;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.admin-item {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    border: 2px solid var(--glass-border);
+    padding: 12px;
+    box-shadow: 2px 2px 0 var(--glass-border);
+}
+
+.admin-item-title {
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    font-size: 0.95rem;
+}
+
+.admin-item-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.admin-hidden {
+    display: none;
 }
 
 /* --- THE ANIMATION CLASSES --- */

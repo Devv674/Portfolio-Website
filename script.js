@@ -44,21 +44,26 @@ document.addEventListener("DOMContentLoaded", () => {
     // 1.5 Theme Toggle
     const themeToggle = document.querySelector('.theme-toggle');
     const setTheme = (theme) => {
-        document.body.dataset.theme = theme;
+        const isDark = theme === 'dark';
+        if (isDark) {
+            document.body.dataset.theme = 'dark';
+        } else {
+            document.body.removeAttribute('data-theme');
+        }
         if (themeToggle) {
             const icon = themeToggle.querySelector('i');
             if (icon) {
-                icon.className = theme === 'light' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+                icon.className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
             }
-            themeToggle.setAttribute('aria-pressed', theme === 'light' ? 'true' : 'false');
-            themeToggle.setAttribute('aria-label', theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode');
+            themeToggle.setAttribute('aria-pressed', isDark ? 'true' : 'false');
+            themeToggle.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
         }
         localStorage.setItem('theme', theme);
     };
 
     const storedTheme = localStorage.getItem('theme');
-    const prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
-    setTheme(storedTheme || (prefersLight ? 'light' : 'dark'));
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    setTheme(storedTheme || (prefersDark ? 'dark' : 'light'));
 
     if (themeToggle) {
         themeToggle.addEventListener('click', () => {
@@ -140,96 +145,241 @@ document.addEventListener("DOMContentLoaded", () => {
 
     observeRevealElements(document.querySelectorAll('.reveal-up, .reveal-down, .reveal-left, .reveal-right'));
 
-    // 4.5 GitHub Projects Auto-Sync
+    // 4.5 Content Auto-Sync
     const projectsSection = document.querySelector('#projects');
     const projectsGrid = document.querySelector('#projects-grid');
     const projectsMessage = document.querySelector('#projects-message');
 
-    const setProjectsMessage = (text, isError = false) => {
-        if (!projectsMessage) return;
-        projectsMessage.textContent = text;
-        projectsMessage.style.display = text ? 'block' : 'none';
-        projectsMessage.classList.toggle('error', isError);
+    const certificatesGrid = document.querySelector('#certificates-grid');
+    const certificatesMessage = document.querySelector('#certificates-message');
+
+    const setSectionMessage = (element, text, isError = false) => {
+        if (!element) return;
+        element.textContent = text;
+        element.style.display = text ? 'block' : 'none';
+        element.classList.toggle('error', isError);
     };
 
-    if (projectsSection && projectsGrid) {
+    const fetchJson = (url) => fetch(url, { headers: { 'Accept': 'application/json' } })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Request failed');
+            }
+            return response.json();
+        });
+
+    const buildTagList = (tags) => {
+        const tagContainer = document.createElement('div');
+        tagContainer.className = 'skill-tags';
+        tags.forEach(tag => {
+            const span = document.createElement('span');
+            span.textContent = tag;
+            tagContainer.appendChild(span);
+        });
+        return tagContainer;
+    };
+
+    const renderProjectsFromApi = (projects) => {
+        if (!projectsGrid) return;
+        projectsGrid.innerHTML = '';
+        projects.forEach((project, index) => {
+            const card = document.createElement('div');
+            card.className = `glass-card tilt-card reveal-${index % 2 === 0 ? 'left' : 'right'}`;
+
+            const title = document.createElement('h3');
+            const titleIcon = document.createElement('i');
+            titleIcon.className = 'fa-solid fa-folder-open';
+            title.appendChild(titleIcon);
+            title.append(` ${project.title}`);
+
+            const description = document.createElement('p');
+            description.style.color = 'var(--text-muted)';
+            description.style.marginBottom = '20px';
+            description.textContent = project.description || 'No description yet.';
+
+            const tagValues = (project.tags || '')
+                .split(',')
+                .map(tag => tag.trim())
+                .filter(Boolean);
+            if (project.year) {
+                tagValues.push(project.year);
+            }
+
+            card.appendChild(title);
+            card.appendChild(description);
+
+            if (tagValues.length > 0) {
+                card.appendChild(buildTagList(tagValues));
+            }
+
+            if (project.link) {
+                const link = document.createElement('a');
+                link.className = 'project-link';
+                link.href = project.link;
+                link.target = '_blank';
+                link.rel = 'noopener';
+                link.append('View Project ');
+                const linkIcon = document.createElement('i');
+                linkIcon.className = 'fa-solid fa-arrow-up-right-from-square';
+                link.appendChild(linkIcon);
+                card.appendChild(link);
+                attachCursorHover(link);
+            }
+
+            projectsGrid.appendChild(card);
+            enableTilt(card);
+            observeRevealElements([card]);
+        });
+    };
+
+    const renderProjectsFromGitHub = () => {
+        if (!projectsSection || !projectsGrid) return Promise.resolve();
         const username = projectsSection.dataset.githubUser;
         if (!username) {
-            setProjectsMessage('No GitHub user configured for projects.', true);
-        } else {
-            fetch(`https://api.github.com/users/${encodeURIComponent(username)}/repos?sort=updated&per_page=100`, {
-                headers: { 'Accept': 'application/vnd.github+json' }
-            })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('GitHub request failed');
-                    }
-                    return response.json();
-                })
-                .then(repos => {
-                    const ownRepos = repos.filter(repo => !repo.fork);
-                    projectsGrid.innerHTML = '';
-
-                    if (ownRepos.length === 0) {
-                        setProjectsMessage('No public repositories yet.');
-                        return;
-                    }
-
-                    setProjectsMessage('');
-
-                    ownRepos.forEach((repo, index) => {
-                        const card = document.createElement('div');
-                        card.className = `glass-card tilt-card reveal-${index % 2 === 0 ? 'left' : 'right'}`;
-
-                        const title = document.createElement('h3');
-                        const titleIcon = document.createElement('i');
-                        titleIcon.className = 'fa-brands fa-github';
-                        title.appendChild(titleIcon);
-                        title.append(` ${repo.name}`);
-
-                        const description = document.createElement('p');
-                        description.style.color = 'var(--text-muted)';
-                        description.style.marginBottom = '20px';
-                        description.textContent = repo.description || 'No description yet.';
-
-                        const tags = document.createElement('div');
-                        tags.className = 'skill-tags';
-                        const tagValues = [];
-                        if (repo.language) {
-                            tagValues.push(repo.language);
-                        }
-                        tagValues.push('GitHub');
-                        tagValues.forEach(tag => {
-                            const span = document.createElement('span');
-                            span.textContent = tag;
-                            tags.appendChild(span);
-                        });
-
-                        const link = document.createElement('a');
-                        link.className = 'project-link';
-                        link.href = repo.html_url;
-                        link.target = '_blank';
-                        link.rel = 'noopener';
-                        link.append('View on GitHub ');
-                        const linkIcon = document.createElement('i');
-                        linkIcon.className = 'fa-solid fa-arrow-up-right-from-square';
-                        link.appendChild(linkIcon);
-
-                        card.appendChild(title);
-                        card.appendChild(description);
-                        card.appendChild(tags);
-                        card.appendChild(link);
-
-                        projectsGrid.appendChild(card);
-                        enableTilt(card);
-                        observeRevealElements([card]);
-                        attachCursorHover(link);
-                    });
-                })
-                .catch(() => {
-                    setProjectsMessage('Unable to load GitHub projects right now.', true);
-                });
+            setSectionMessage(projectsMessage, 'No GitHub user configured for projects.', true);
+            return Promise.resolve();
         }
+
+        return fetch(`https://api.github.com/users/${encodeURIComponent(username)}/repos?sort=updated&per_page=100`, {
+            headers: { 'Accept': 'application/vnd.github+json' }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('GitHub request failed');
+                }
+                return response.json();
+            })
+            .then(repos => {
+                const ownRepos = repos.filter(repo => !repo.fork);
+                projectsGrid.innerHTML = '';
+
+                if (ownRepos.length === 0) {
+                    setSectionMessage(projectsMessage, 'No public repositories yet.');
+                    return;
+                }
+
+                setSectionMessage(projectsMessage, '');
+
+                ownRepos.forEach((repo, index) => {
+                    const card = document.createElement('div');
+                    card.className = `glass-card tilt-card reveal-${index % 2 === 0 ? 'left' : 'right'}`;
+
+                    const title = document.createElement('h3');
+                    const titleIcon = document.createElement('i');
+                    titleIcon.className = 'fa-brands fa-github';
+                    title.appendChild(titleIcon);
+                    title.append(` ${repo.name}`);
+
+                    const description = document.createElement('p');
+                    description.style.color = 'var(--text-muted)';
+                    description.style.marginBottom = '20px';
+                    description.textContent = repo.description || 'No description yet.';
+
+                    const tagValues = [];
+                    if (repo.language) {
+                        tagValues.push(repo.language);
+                    }
+                    tagValues.push('GitHub');
+
+                    const link = document.createElement('a');
+                    link.className = 'project-link';
+                    link.href = repo.html_url;
+                    link.target = '_blank';
+                    link.rel = 'noopener';
+                    link.append('View on GitHub ');
+                    const linkIcon = document.createElement('i');
+                    linkIcon.className = 'fa-solid fa-arrow-up-right-from-square';
+                    link.appendChild(linkIcon);
+
+                    card.appendChild(title);
+                    card.appendChild(description);
+                    card.appendChild(buildTagList(tagValues));
+                    card.appendChild(link);
+
+                    projectsGrid.appendChild(card);
+                    enableTilt(card);
+                    observeRevealElements([card]);
+                    attachCursorHover(link);
+                });
+            })
+            .catch(() => {
+                setSectionMessage(projectsMessage, 'Unable to load GitHub projects right now.', true);
+            });
+    };
+
+    if (projectsGrid) {
+        fetchJson('/api/projects')
+            .then(projects => {
+                if (projects.length > 0) {
+                    setSectionMessage(projectsMessage, '');
+                    renderProjectsFromApi(projects);
+                } else {
+                    return renderProjectsFromGitHub();
+                }
+            })
+            .catch(() => {
+                renderProjectsFromGitHub();
+            });
+    }
+
+    const renderContentCards = (items, grid, message, emptyText, builder) => {
+        if (!grid) return;
+        grid.innerHTML = '';
+        if (!items || items.length === 0) {
+            setSectionMessage(message, emptyText);
+            return;
+        }
+        setSectionMessage(message, '');
+        items.forEach(item => {
+            const card = builder(item);
+            grid.appendChild(card);
+            observeRevealElements([card]);
+        });
+    };
+
+    const createCertificateCard = (certificate) => {
+        const card = document.createElement('div');
+        card.className = 'content-card reveal-up';
+
+        const title = document.createElement('h3');
+        title.textContent = certificate.title;
+
+        const meta = document.createElement('div');
+        meta.className = 'content-meta';
+        const metaParts = [certificate.issuer, certificate.issue_date].filter(Boolean);
+        meta.textContent = metaParts.length ? metaParts.join(' • ') : 'Certificate';
+
+        const description = document.createElement('p');
+        description.textContent = certificate.description || 'Certificate details coming soon.';
+
+        card.appendChild(title);
+        card.appendChild(meta);
+        card.appendChild(description);
+
+        if (certificate.link) {
+            const actions = document.createElement('div');
+            actions.className = 'content-actions';
+            const link = document.createElement('a');
+            link.className = 'project-link';
+            link.href = certificate.link;
+            link.target = '_blank';
+            link.rel = 'noopener';
+            link.append('View Credential ');
+            const linkIcon = document.createElement('i');
+            linkIcon.className = 'fa-solid fa-arrow-up-right-from-square';
+            link.appendChild(linkIcon);
+            actions.appendChild(link);
+            card.appendChild(actions);
+            attachCursorHover(link);
+        }
+
+        return card;
+    };
+
+    if (certificatesGrid) {
+        fetchJson('/api/certificates')
+            .then(items => renderContentCards(items, certificatesGrid, certificatesMessage, 'No certificates yet.', createCertificateCard))
+            .catch(() => setSectionMessage(certificatesMessage, 'Start the server to load certificates.', true));
     }
 
     // 5. Smooth Nav Scrolling

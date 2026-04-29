@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Devashish Duhijod</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="admin-page">
+        <div class="admin-shell">
+            <div class="admin-header">
+                <div>
+                    <h1>Admin Dashboard</h1>
+                    <div class="content-meta">Manage projects, certificates, testimonials, and posts</div>
+                </div>
+                <button id="logout-btn" class="admin-btn admin-hidden">Logout</button>
+            </div>
+
+            <section id="login-section" class="admin-card">
+                <h2>Login</h2>
+                <form id="login-form" class="admin-form">
+                    <input type="email" name="email" placeholder="Admin email" required>
+                    <input type="password" name="password" placeholder="Password" required>
+                    <div class="admin-actions">
+                        <button type="submit" class="admin-btn">Sign In</button>
+                    </div>
+                </form>
+                <p id="login-message" class="projects-message"></p>
+            </section>
+
+            <div id="dashboard" class="admin-hidden">
+                <section class="admin-card">
+                    <h2>Projects</h2>
+                    <form id="project-form" class="admin-form">
+                        <input type="hidden" name="id">
+                        <input type="text" name="title" placeholder="Project title" required>
+                        <input type="text" name="year" placeholder="Year (e.g., 2026)">
+                        <input type="text" name="tags" placeholder="Tags (comma-separated)">
+                        <input type="url" name="link" placeholder="Project link">
+                        <textarea name="description" placeholder="Project description"></textarea>
+                        <label>
+                            <input type="checkbox" name="is_published" checked>
+                            Publish this project
+                        </label>
+                        <div class="admin-actions">
+                            <button type="submit" class="admin-btn">Save Project</button>
+                            <button type="button" class="admin-btn secondary" data-reset="project-form">Reset</button>
+                        </div>
+                    </form>
+                    <div id="project-list" class="admin-list"></div>
+                </section>
+
+                <section class="admin-card">
+                    <h2>Certificates</h2>
+                    <form id="certificate-form" class="admin-form">
+                        <input type="hidden" name="id">
+                        <input type="text" name="title" placeholder="Certificate title" required>
+                        <input type="text" name="issuer" placeholder="Issuer">
+                        <input type="text" name="issue_date" placeholder="Issue date (e.g., Apr 2026)">
+                        <input type="url" name="link" placeholder="Credential link">
+                        <textarea name="description" placeholder="Certificate description"></textarea>
+                        <label>
+                            <input type="checkbox" name="is_published" checked>
+                            Publish this certificate
+                        </label>
+                        <div class="admin-actions">
+                            <button type="submit" class="admin-btn">Save Certificate</button>
+                            <button type="button" class="admin-btn secondary" data-reset="certificate-form">Reset</button>
+                        </div>
+                    </form>
+                    <div id="certificate-list" class="admin-list"></div>
+                </section>
+
+                <section class="admin-card">
+                    <h2>Testimonials</h2>
+                    <form id="testimonial-form" class="admin-form">
+                        <input type="hidden" name="id">
+                        <input type="text" name="name" placeholder="Name" required>
+                        <input type="text" name="role" placeholder="Role">
+                        <input type="text" name="company" placeholder="Company">
+                        <input type="url" name="link" placeholder="Source link (optional)">
+                        <textarea name="quote" placeholder="Testimonial quote" required></textarea>
+                        <label>
+                            <input type="checkbox" name="is_published" checked>
+                            Publish this testimonial
+                        </label>
+                        <div class="admin-actions">
+                            <button type="submit" class="admin-btn">Save Testimonial</button>
+                            <button type="button" class="admin-btn secondary" data-reset="testimonial-form">Reset</button>
+                        </div>
+                    </form>
+                    <div id="testimonial-list" class="admin-list"></div>
+                </section>
+
+                <section class="admin-card">
+                    <h2>Blog Posts</h2>
+                    <form id="post-form" class="admin-form">
+                        <input type="hidden" name="id">
+                        <input type="text" name="title" placeholder="Post title" required>
+                        <input type="text" name="published_at" placeholder="Publish date (e.g., 2026-04-30)">
+                        <input type="url" name="link" placeholder="Post link">
+                        <textarea name="excerpt" placeholder="Short excerpt"></textarea>
+                        <textarea name="content" placeholder="Full post content (optional)"></textarea>
+                        <label>
+                            <input type="checkbox" name="is_published" checked>
+                            Publish this post
+                        </label>
+                        <div class="admin-actions">
+                            <button type="submit" class="admin-btn">Save Post</button>
+                            <button type="button" class="admin-btn secondary" data-reset="post-form">Reset</button>
+                        </div>
+                    </form>
+                    <div id="post-list" class="admin-list"></div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+</html>
