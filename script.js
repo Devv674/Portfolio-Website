@@ -148,6 +148,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const certificatesGrid = document.querySelector('#certificates-grid');
     const certificatesMessage = document.querySelector('#certificates-message');
+    const achievementsGrid = document.querySelector('#achievements-grid');
+    const achievementsMessage = document.querySelector('#achievements-message');
     const fallbackCertificates = [
         {
             title: 'Artificial Intelligence Fundamentals',
@@ -158,11 +160,12 @@ document.addEventListener("DOMContentLoaded", () => {
             description: 'This credential earner demonstrates knowledge of artificial intelligence (AI) concepts, such as natural language processing, computer vision, machine learning, deep learning, chatbots, and neural networks; AI ethics; and the applications of AI.'
         }
     ];
-    const extraProjects = [
+    const achievements = [
         {
             title: 'HackBlitz 3.0 - Hackathon Winner',
-            description: 'Winner at HackBlitz 3.0, an 8-hour offline hackathon hosted by Jhulelal Institute of Technology (JIT), Nagpur, where teams of 2-4 build solutions from scratch.',
-            tags: ['Hackathon Winner', 'JIT Nagpur', 'HackBlitz 3.0', 'Team 2-4', 'Offline'],
+            host: 'Jhulelal Institute of Technology, Nagpur',
+            event: 'HackBlitz 3.0',
+            description: 'Winner at HackBlitz 3.0, an 8-hour offline hackathon where teams of 2-4 build solutions from scratch.',
             link: 'https://unstop.com/p/hack-blitz-jhulelal-institute-of-technology-1438941',
             image: 'https://drive.google.com/uc?export=view&id=1WMhwSjWEnLs2i5-sZ0jZIPMfoVZlVgaR'
         }
@@ -192,68 +195,6 @@ document.addEventListener("DOMContentLoaded", () => {
             tagContainer.appendChild(span);
         });
         return tagContainer;
-    };
-
-    const appendExtraProjects = (existingTitles = []) => {
-        if (!projectsGrid || extraProjects.length === 0) return;
-        const existingSet = new Set(
-            existingTitles
-                .map(title => (title || '').toString().trim().toLowerCase())
-                .filter(Boolean)
-        );
-        extraProjects.forEach((project, index) => {
-            if (existingSet.has(project.title.toLowerCase())) {
-                return;
-            }
-            const card = document.createElement('div');
-            const revealIndex = (projectsGrid.children.length + index) % 2 === 0 ? 'left' : 'right';
-            card.className = `glass-card tilt-card reveal-${revealIndex}`;
-
-            if (project.image) {
-                const image = document.createElement('img');
-                image.className = 'project-image';
-                image.src = project.image;
-                image.alt = `${project.title} photo`;
-                image.loading = 'lazy';
-                card.appendChild(image);
-            }
-
-            const title = document.createElement('h3');
-            const titleIcon = document.createElement('i');
-            titleIcon.className = 'fa-solid fa-trophy';
-            title.appendChild(titleIcon);
-            title.append(` ${project.title}`);
-
-            const description = document.createElement('p');
-            description.style.color = 'var(--text-muted)';
-            description.style.marginBottom = '20px';
-            description.textContent = project.description || 'Project details coming soon.';
-
-            card.appendChild(title);
-            card.appendChild(description);
-
-            if (project.tags && project.tags.length > 0) {
-                card.appendChild(buildTagList(project.tags));
-            }
-
-            if (project.link) {
-                const link = document.createElement('a');
-                link.className = 'project-link';
-                link.href = project.link;
-                link.target = '_blank';
-                link.rel = 'noopener';
-                link.append('View Event ');
-                const linkIcon = document.createElement('i');
-                linkIcon.className = 'fa-solid fa-arrow-up-right-from-square';
-                link.appendChild(linkIcon);
-                card.appendChild(link);
-                attachCursorHover(link);
-            }
-
-            projectsGrid.appendChild(card);
-            enableTilt(card);
-            observeRevealElements([card]);
-        });
     };
 
     const renderProjectsFromApi = (projects) => {
@@ -307,8 +248,6 @@ document.addEventListener("DOMContentLoaded", () => {
             enableTilt(card);
             observeRevealElements([card]);
         });
-
-        appendExtraProjects(projects.map(project => project.title));
     };
 
     const renderProjectsFromGitHub = () => {
@@ -333,8 +272,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 projectsGrid.innerHTML = '';
 
                 if (ownRepos.length === 0) {
-                    appendExtraProjects();
-                    setSectionMessage(projectsMessage, extraProjects.length > 0 ? '' : 'No public repositories yet.');
+                    setSectionMessage(projectsMessage, 'No public repositories yet.');
                     return;
                 }
 
@@ -381,12 +319,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     observeRevealElements([card]);
                     attachCursorHover(link);
                 });
-
-                appendExtraProjects(ownRepos.map(repo => repo.name));
             })
             .catch(() => {
-                appendExtraProjects();
-                setSectionMessage(projectsMessage, extraProjects.length > 0 ? '' : 'Unable to load GitHub projects right now.', extraProjects.length === 0);
+                setSectionMessage(projectsMessage, 'Unable to load GitHub projects right now.', true);
             });
     };
 
@@ -468,6 +403,54 @@ document.addEventListener("DOMContentLoaded", () => {
         return card;
     };
 
+    const createAchievementCard = (achievement) => {
+        const card = document.createElement('div');
+        card.className = 'content-card reveal-up';
+
+        if (achievement.image) {
+            const image = document.createElement('img');
+            image.className = 'achievement-image';
+            image.src = achievement.image;
+            image.alt = `${achievement.title} photo`;
+            image.loading = 'lazy';
+            card.appendChild(image);
+        }
+
+        const title = document.createElement('h3');
+        title.textContent = achievement.title;
+
+        const meta = document.createElement('div');
+        meta.className = 'content-meta';
+        const metaParts = [achievement.event, achievement.host].filter(Boolean);
+        meta.textContent = metaParts.length ? metaParts.join(' • ') : 'Achievement';
+
+        const description = document.createElement('p');
+        description.textContent = achievement.description || 'Achievement details coming soon.';
+
+        card.appendChild(title);
+        card.appendChild(meta);
+        card.appendChild(description);
+
+        if (achievement.link) {
+            const actions = document.createElement('div');
+            actions.className = 'content-actions';
+            const link = document.createElement('a');
+            link.className = 'project-link';
+            link.href = achievement.link;
+            link.target = '_blank';
+            link.rel = 'noopener';
+            link.append('View Event ');
+            const linkIcon = document.createElement('i');
+            linkIcon.className = 'fa-solid fa-arrow-up-right-from-square';
+            link.appendChild(linkIcon);
+            actions.appendChild(link);
+            card.appendChild(actions);
+            attachCursorHover(link);
+        }
+
+        return card;
+    };
+
     if (certificatesGrid) {
         fetchJson('/api/certificates')
             .then(items => {
@@ -478,6 +461,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 renderContentCards(fallbackCertificates, certificatesGrid, certificatesMessage, 'No certificates yet.', createCertificateCard);
             })
             .catch(() => renderContentCards(fallbackCertificates, certificatesGrid, certificatesMessage, 'No certificates yet.', createCertificateCard));
+    }
+
+    if (achievementsGrid) {
+        renderContentCards(achievements, achievementsGrid, achievementsMessage, 'No achievements yet.', createAchievementCard);
     }
 
     // 5. Smooth Nav Scrolling
