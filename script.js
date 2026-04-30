@@ -45,11 +45,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const themeToggle = document.querySelector('.theme-toggle');
     const setTheme = (theme) => {
         const isDark = theme === 'dark';
-        if (isDark) {
-            document.body.dataset.theme = 'dark';
-        } else {
-            document.body.removeAttribute('data-theme');
-        }
+        document.body.dataset.theme = isDark ? 'dark' : 'light';
         if (themeToggle) {
             const icon = themeToggle.querySelector('i');
             if (icon) {
@@ -58,16 +54,16 @@ document.addEventListener("DOMContentLoaded", () => {
             themeToggle.setAttribute('aria-pressed', isDark ? 'true' : 'false');
             themeToggle.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
         }
-        localStorage.setItem('theme', theme);
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
     };
 
     const storedTheme = localStorage.getItem('theme');
     const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    setTheme(storedTheme || (prefersDark ? 'dark' : 'light'));
+    setTheme(storedTheme === 'dark' || storedTheme === 'light' ? storedTheme : (prefersDark ? 'dark' : 'light'));
 
     if (themeToggle) {
         themeToggle.addEventListener('click', () => {
-            const currentTheme = document.body.dataset.theme === 'light' ? 'light' : 'dark';
+            const currentTheme = document.body.dataset.theme === 'dark' ? 'dark' : 'light';
             setTheme(currentTheme === 'light' ? 'dark' : 'light');
         });
     }
