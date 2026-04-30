@@ -445,6 +445,15 @@ section {
     gap: 12px;
 }
 
+.project-image {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border: 2px solid var(--glass-border);
+    background: var(--bg-dark);
+    box-shadow: 2px 2px 0 var(--glass-border);
+}
+
 .certificate-image {
     width: 120px;
     height: 120px;
@@ -771,6 +780,7 @@ footer {
     .tagline { font-size: 1rem; }
     .project-link { font-size: 0.8rem; }
     .certificate-image { width: 100px; height: 100px; }
+    .project-image { height: 160px; }
 }
 
 @media (max-width: 900px) {
